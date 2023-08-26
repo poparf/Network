@@ -1,0 +1,71 @@
+{% extends 'network/layout.html' %}
+
+{% block title %}Network - {{profile.username}}{% endblock %}
+
+
+{% block body %}
+    <div>
+        <p>{{ profile.username }}</p>
+    </div>
+    
+    {% if user.is_authenticated %}
+        {% if request.user != profile %}
+            {% if isFollowing %}
+                <form action="{% url 'unfollow'%}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="userfollow" value="{{profile}}">
+                    <input type="submit" value="Unfollow">
+                </form>
+            {% else %}
+                <form action="{% url 'follow' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="userfollow" value="{{profile}}">
+                    <input type="submit" value="Follow">
+                </form>
+            {%endif %}
+        {% endif %}
+    {% endif %}
+    <div>
+        <p>Following: {{ following.count }}</p>
+        <p>Followers: {{ followers.count }}</p>
+    </div>
+
+
+    <div>
+        {% for post in page_obj %}
+        <div class="post-container">
+            <div class="post-principal-container">
+                
+                <a href="{% url 'userprofile' post.user.username%}"><p class="post-username">{{post.user.username}}</p></a>
+                {% if request.user == post.user%}
+                <button class="btn btn-primary"><a href="{% url 'editpost' post.id %}" class="text-light text-decoration-none">Edit</a></button>
+                {% endif %}
+            </div>
+            <div>
+                <p class="post-timestamp">{{post.timestamp}}</p>
+                <p class="post-content">{{post.content}}</p>
+                <p>Likes: {{ post.likes }}</p>
+                <a href="" class="text-decoration-none">Comment</a>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+    </div>
+{% endblock %}

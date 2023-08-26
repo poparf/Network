@@ -1,0 +1,70 @@
+{% extends "network/layout.html" %}
+
+
+{% block body %}
+
+    {% if message %}
+    <div>
+        <p>Something went wrong</p>
+    </div>
+    {% endif %}
+    <form class="post-form" action="{% url 'createpost' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{UserPostForm}}
+        <input type="submit" value="Post" class="btn btn-outline-primary">
+    </form>
+
+
+    {% for post in page_obj %}
+        <div class="post-container" postid="{{post.id}}">
+            <div class="post-principal-container">
+                
+                <a href="{% url 'userprofile' post.user.username%}"><p class="post-username">{{post.user.username}}</p></a>
+
+                {% if request.user == post.user%}
+                <button class="btn btn-primary"><a href="{% url 'editpost' post.id %}" class="text-light text-decoration-none">Edit</a></button>
+                {% endif %}
+            </div>
+            <div class="post-second-container">
+                <p class="post-timestamp">{{post.timestamp}}</p>
+                <p class="post-content">{{post.content}}</p>
+               
+                
+                    
+                    <!-- Other form fields and buttons -->
+                    <button class="btn btn-outline-danger like-btn">
+                        {% if post.id in likedPosts %}
+                            Unlike
+                        {% else %}
+                            Like
+                        {% endif %}
+                    </button>
+               
+                <p class="post-likes">{{ post.likes }}</p>
+                <a href="" class="text-decoration-none">Comment</a>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+    <script>
+        // Render the CSRF token as a JavaScript variable
+        var csrftoken = "{{ csrf_token }}";
+      </script>
+{% endblock %}
